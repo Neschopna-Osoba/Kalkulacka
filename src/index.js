@@ -13,11 +13,11 @@ function updateDisplay() {
 updateDisplay();
 
 function inputDigit(digit) {
-  if (calculator.waitingForSecondOperand) {
+  if (calculator.waitingForSecondOperand === true) {
     calculator.displayValue = digit;
     calculator.waitingForSecondOperand = false;
   } else {
-    if (calculator.displayValue == "0") {
+    if (calculator.displayValue === "0") {
       calculator.displayValue = digit;
     } else {
       calculator.displayValue = calculator.displayValue + digit;
@@ -26,25 +26,31 @@ function inputDigit(digit) {
 }
 
 function handleOperator(nextOperator) {
-  if ((calculator.firstOperand = null)) {
+  if (calculator.firstOperand === null) {
     calculator.firstOperand = parseFloat(calculator.displayValue);
   } else if (calculator.operator) {
-    const result = performCalculation[calculator.displayValue](
+    const result = performCalculation[calculator.operator](
       calculator.firstOperand,
       parseFloat(calculator.displayValue)
     );
+
     calculator.displayValue = String(result);
     calculator.firstOperand = result;
   }
+
   calculator.waitingForSecondOperand = true;
   calculator.operator = nextOperator;
 }
 
 const performCalculation = {
   "/": (firstOperand, secondOperand) => firstOperand / secondOperand,
+
   "*": (firstOperand, secondOperand) => firstOperand * secondOperand,
+
   "+": (firstOperand, secondOperand) => firstOperand + secondOperand,
+
   "-": (firstOperand, secondOperand) => firstOperand - secondOperand,
+
   "=": (firstOperand, secondOperand) => secondOperand
 };
 
@@ -52,17 +58,27 @@ const keys = document.querySelector(".calculator-keys");
 keys.addEventListener("click", event => {
   const { target } = event;
   if (!target.matches("button")) {
+    //Stisknuto něco jiného než tlačítko => skončit
     return;
   }
-
   if (target.classList.contains("operator")) {
+    handleOperator(target.value);
+    updateDisplay();
     return;
   }
-
   if (target.classList.contains("all-clear")) {
+    reserCalculator();
+    updateDisplay();
     return;
   }
 
   inputDigit(target.value);
   updateDisplay();
 });
+
+function reserCalculator() {
+  calculator.displayValue = "0";
+  calculator.firstOperand = null;
+  calculator.waitingForSecondOperand = false;
+  calculator.operator = null;
+}
